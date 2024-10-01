@@ -4,10 +4,10 @@ import com.example.todo.dto.ToDoDTO;
 import com.example.todo.model.ToDoModel;
 import com.example.todo.repository.ToDoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -26,6 +26,7 @@ public class ToDoService {
                 .toList();
     }
 
+
     public ToDoDTO createToDo(ToDoDTO toDoDTO) {
         toDoRepository.save(new
                 ToDoModel(toDoDTO.id(),
@@ -35,15 +36,18 @@ public class ToDoService {
         return toDoDTO;
     }
 
+
     public ToDoDTO getToDoById(String id) {
-        Optional<ToDoModel> foundToDo = toDoRepository.findById(id);
-        return foundToDo.map(toDoModel ->
-                        new ToDoDTO(toDoModel.id(),
-                                toDoModel.title(),
-                                toDoModel.description(),
-                                toDoModel.completed()))
-                .orElse(null);
+        ToDoModel foundToDo = toDoRepository.findById(id).orElseThrow(
+                () -> new NoSuchElementException("No such element found")
+        );
+        return new ToDoDTO(foundToDo.id(),
+                foundToDo.title(),
+                foundToDo.description(),
+                foundToDo.completed());
+
     }
+
 
     public boolean deleteById(String id) {
         Optional<ToDoModel> foundToDo = toDoRepository.findById(id);
@@ -54,6 +58,7 @@ public class ToDoService {
             return false;
         }
     }
+
 
     public ToDoDTO updateById(String id, ToDoDTO updateDTO) {
         Optional<ToDoModel> foundToDo = toDoRepository.findById(id);
